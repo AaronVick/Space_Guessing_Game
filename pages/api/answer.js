@@ -18,19 +18,12 @@ export default async function handler(req, res) {
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
-      const message = isCorrect 
-        ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
-        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
-
-      console.log('Generated message:', message);
+      const result = isCorrect ? 'Correct' : 'Wrong';
 
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
-      const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
-        type: 'answer',
-        message: message
-      }).toString();
+      const ogImageUrl = `${baseUrl}/api/og?type=answer&result=${result}&correct=${newCorrectCount}&total=${newTotalAnswered}`;
 
       html = `
 <!DOCTYPE html>
@@ -45,7 +38,7 @@ export default async function handler(req, res) {
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
     <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount, stage: 'answer' }))}" />
   </head>
-  <body>${message}</body>
+  <body>${result}! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.</body>
 </html>`;
     } else {
       console.log('Generating new question');
@@ -55,12 +48,7 @@ export default async function handler(req, res) {
       const answers = [title, wrongSpaceName].sort(() => Math.random() - 0.5);
       const newCorrectIndex = answers.indexOf(title) + 1;
 
-      const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
-        type: 'question',
-        title: title,
-        description: description,
-        image: image
-      }).toString();
+      const ogImageUrl = `${baseUrl}/api/og?type=question&image=${encodeURIComponent(image)}`;
 
       html = `
 <!DOCTYPE html>
@@ -88,7 +76,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?type=error&message=${encodeURIComponent('An error occurred. Please try again.')}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?type=error" />
     <meta property="fc:frame:button:1" content="Try Again" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
   </head>
