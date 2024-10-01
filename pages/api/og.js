@@ -6,11 +6,24 @@ export const config = {
 
 export default function handler(req) {
   try {
-    const { searchParams } = new URL(req.url);
+    console.log('OG handler started');
+    console.log('Request URL:', req.url);
+
+    let url;
+    try {
+      url = new URL(req.url, 'http://localhost');
+    } catch (error) {
+      console.error('Error parsing URL:', error);
+      throw new Error('Invalid URL');
+    }
+
+    const searchParams = url.searchParams;
     
     const message = searchParams.get('message');
     const image = searchParams.get('image');
     const description = searchParams.get('description');
+
+    console.log('Parsed params:', { message, image, description });
 
     if (message) {
       // Answer frame
@@ -18,12 +31,12 @@ export default function handler(req) {
         (
           <div
             style={{
-              fontSize: 60,
+              fontSize: 40,
               color: 'white',
               background: 'black',
               width: '100%',
               height: '100%',
-              padding: '50px 200px',
+              padding: '50px 50px',
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
@@ -48,7 +61,7 @@ export default function handler(req) {
               background: 'black',
               width: '100%',
               height: '100%',
-              padding: '50px 200px',
+              padding: '50px 50px',
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
@@ -76,7 +89,7 @@ export default function handler(req) {
               background: 'black',
               width: '100%',
               height: '100%',
-              padding: '50px 200px',
+              padding: '50px 50px',
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
@@ -92,8 +105,8 @@ export default function handler(req) {
       );
     }
   } catch (e) {
-    console.log(`${e.message}`);
-    return new Response(`Failed to generate the image`, {
+    console.error(`Error in OG handler: ${e.message}`);
+    return new Response(`Failed to generate the image: ${e.message}`, {
       status: 500,
     });
   }
