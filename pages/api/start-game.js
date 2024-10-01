@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app';
 
     // Fetch space data from NASA API
-    const spaceData = await fetchSpaceData('galaxy OR nebula');
+    const spaceData = await fetchSpaceData('galaxy');
     const { title, description, image } = spaceData;
 
     // Fetch a random wrong space object name
