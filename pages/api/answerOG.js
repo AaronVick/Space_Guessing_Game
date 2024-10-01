@@ -6,7 +6,7 @@ export const config = {
 
 export default function handler(req) {
   try {
-    const { searchParams } = new URL(req.url);
+    const searchParams = req.nextUrl.searchParams;
 
     const result = searchParams.get('result');  // Correct or Wrong
     const correctAnswer = searchParams.get('correctAnswer');  // The correct answer
