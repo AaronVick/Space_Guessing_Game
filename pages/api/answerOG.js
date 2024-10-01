@@ -6,16 +6,15 @@ export const config = {
 
 export default function handler(req) {
   try {
-    // Fix the issue by correctly creating the URL object
     const url = new URL(req.url, `https://${req.headers.host}`);
-    
+
     const result = url.searchParams.get('result');  // Correct or Wrong
     const correctAnswer = url.searchParams.get('correctAnswer');  // The correct answer
     const score = url.searchParams.get('score');  // User's score: "X out of Y"
 
     // Basic validation of inputs
     if (result && correctAnswer && score) {
-      // Render the answer frame image
+      // Render the answer frame image - lightweight with no external image fetching
       return new ImageResponse(
         (
           <div
@@ -41,7 +40,7 @@ export default function handler(req) {
         {
           width: 1200,
           height: 630,
-        },
+        }
       );
     } else {
       // Handle missing parameters
