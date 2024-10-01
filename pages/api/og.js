@@ -5,8 +5,15 @@ export const config = {
 };
 
 export default function handler(req) {
+  console.log('OG handler started');
+  console.log('Request URL:', req.url);
+
   try {
-    const { searchParams } = new URL(req.url);
+    const url = new URL(req.url, 'http://localhost');
+    console.log('Parsed URL:', url.toString());
+    
+    const searchParams = url.searchParams;
+    console.log('Search params:', Object.fromEntries(searchParams));
     
     const result = searchParams.get('result');
     const answer = searchParams.get('answer');
@@ -15,8 +22,11 @@ export default function handler(req) {
     const image = searchParams.get('image');
     const error = searchParams.get('error');
 
+    console.log('Extracted params:', { result, answer, score, total, image, error });
+
     if (result && answer && score && total) {
       // Answer frame
+      console.log('Generating answer frame');
       return new ImageResponse(
         (
           <div
@@ -46,6 +56,7 @@ export default function handler(req) {
       );
     } else if (image) {
       // Question frame
+      console.log('Generating question frame');
       return new ImageResponse(
         (
           <div
@@ -72,33 +83,9 @@ export default function handler(req) {
           height: 630,
         },
       );
-    } else if (error) {
-      // Error frame
-      return new ImageResponse(
-        (
-          <div
-            style={{
-              fontSize: 40,
-              color: 'white',
-              background: 'black',
-              width: '100%',
-              height: '100%',
-              padding: '50px 50px',
-              textAlign: 'center',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            An error occurred. Please try again.
-          </div>
-        ),
-        {
-          width: 1200,
-          height: 630,
-        },
-      );
     } else {
       // Default frame
+      console.log('Generating default frame');
       return new ImageResponse(
         (
           <div
@@ -125,6 +112,7 @@ export default function handler(req) {
     }
   } catch (e) {
     console.error(`Error in OG handler: ${e.message}`);
+    console.error(e.stack);
     return new Response(`Failed to generate the image: ${e.message}`, {
       status: 500,
     });
