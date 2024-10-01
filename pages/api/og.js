@@ -1,55 +1,47 @@
-import { createCanvas, loadImage } from 'canvas';
+import { ImageResponse } from '@vercel/og';
 
-export default async function handler(req, res) {
-  const { title, description, image } = req.query;
+export const config = {
+  runtime: 'experimental-edge',
+};
 
-  const canvasWidth = 1200;
-  const canvasHeight = 630;
-  const canvas = createCanvas(canvasWidth, canvasHeight);
-  const ctx = canvas.getContext('2d');
-
-  // Set background color
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+export default async function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const description = searchParams.get('description') || 'Guess the space image';
+  const message = searchParams.get('message') || 'Space Guess Game';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-default-url.com';
+  const image = searchParams.get('image') || `${baseUrl}/spaceGame.png`; // Using NEXT_PUBLIC_BASE_URL for static image
 
   try {
-    // Load and draw the space image
-    if (image) {
-      const spaceImage = await loadImage(image);
-      const imgWidth = canvasWidth * 0.5; // Scale the image width to half the canvas
-      const imgHeight = canvasHeight * 0.8; // Scale the image height to 80% of the canvas
-      const imgX = canvasWidth - imgWidth - 20; // Position it with padding from the right
-      const imgY = (canvasHeight - imgHeight) / 2; // Center the image vertically
-      ctx.drawImage(spaceImage, imgX, imgY, imgWidth, imgHeight);
-    }
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: '#000',
+            width: '1200px',
+            height: '630px',
+            color: 'white',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+          }}
+        >
+          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{message}</div>
+          <img
+            src={image}
+            alt="Space Image"
+            style={{ width: '600px', height: '400px', marginTop: '20px' }}
+          />
+          <div style={{ fontSize: '30px', marginTop: '20px' }}>{description}</div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   } catch (error) {
-    console.error('Error loading image:', error);
+    console.error('Error generating image:', error);
+    return new Response('Failed to generate the image', { status: 500 });
   }
-
-  // Set text style
-  ctx.font = 'bold 60px Arial';
-  ctx.fillStyle = '#FFFFFF';
-  ctx.textAlign = 'left';
-
-  // Draw the title
-  if (title) {
-    ctx.fillText(title, 50, 150);
-  }
-
-  // Set description text style
-  ctx.font = 'bold 40px Arial';
-  ctx.fillStyle = '#CCCCCC';
-
-  // Draw the description (truncate if too long)
-  const descriptionText = description || 'Guess the Space Object';
-  const maxDescriptionLength = 90;
-  const truncatedDescription =
-    descriptionText.length > maxDescriptionLength
-      ? descriptionText.slice(0, maxDescriptionLength) + '...'
-      : descriptionText;
-  ctx.fillText(truncatedDescription, 50, 250);
-
-  // Send the response with the generated image
-  res.setHeader('Content-Type', 'image/png');
-  canvas.createPNGStream().pipe(res);
 }
