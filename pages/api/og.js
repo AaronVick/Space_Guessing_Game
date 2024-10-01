@@ -7,18 +7,20 @@ export const config = {
 export default async function handler(req) {
   console.log('Received request URL:', req.url);
 
-  let url;
+  let searchParams;
   try {
-    url = new URL(req.url);
+    // Handle both absolute and relative URLs
+    const url = req.url.startsWith('http') ? new URL(req.url) : new URL(req.url, 'http://dummy.com');
+    searchParams = url.searchParams;
     console.log('Parsed URL:', url.toString());
   } catch (error) {
     console.error('Error parsing URL:', error);
     return new Response('Invalid URL', { status: 400 });
   }
 
-  const title = url.searchParams.get('title') || 'Space Guessing Game';
-  const description = url.searchParams.get('description') || 'Guess the space object based on the image';
-  const image = url.searchParams.get('image') || '/spaceGame.png';
+  const title = searchParams.get('title') || 'Space Guessing Game';
+  const description = searchParams.get('description') || 'Guess the space object based on the image';
+  const image = searchParams.get('image') || '/spaceGame.png';
 
   console.log('Parsed parameters:', { title, description, image });
 
