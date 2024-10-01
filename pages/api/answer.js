@@ -23,15 +23,27 @@ export default async function handler(req, res) {
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
       const result = isCorrect ? 'Correct' : 'Wrong';
 
-      // Return response with only the necessary information
-      const responseData = {
-        result: result,
-        correctAnswer: correctTitle,
-        totalAnswered: newTotalAnswered,
-        correctCount: newCorrectCount
-      };
+      // Build HTML response with necessary metatags for Farcaster frame
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta property="fc:frame" content="vNext" />
+            <meta property="fc:frame:button:1" content="Next Question" />
+            <meta property="fc:frame:button:2" content="Share" />
+            <meta property="fc:frame:post_url" content="/api/answer" />
+            <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount, stage: 'answer' }))}" />
+          </head>
+          <body>
+            <h1>${result}!</h1>
+            <p>The correct answer was: ${correctTitle}</p>
+            <p>Your Score: ${newCorrectCount} / ${newTotalAnswered}</p>
+          </body>
+        </html>
+      `;
 
-      return res.status(200).json(responseData);
+      res.setHeader('Content-Type', 'text/html');
+      return res.status(200).send(html);
     } else {
       return res.status(400).json({ error: 'Invalid stage or button index' });
     }
