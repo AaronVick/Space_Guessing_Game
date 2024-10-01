@@ -2,9 +2,9 @@ import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
 function generateOgImageUrl(baseUrl, title, description, image) {
   const params = new URLSearchParams({
-    title: encodeURIComponent(title),
-    description: encodeURIComponent(truncateDescription(description)),
-    image: encodeURIComponent(image),
+    title: title,
+    description: truncateDescription(description),
+    image: image,
   });
   return `${baseUrl}/api/og?${params.toString()}`;
 }

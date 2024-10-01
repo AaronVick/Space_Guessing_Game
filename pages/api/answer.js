@@ -1,5 +1,10 @@
 import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
+function generateOgImageUrl(baseUrl, params) {
+  const urlParams = new URLSearchParams(params);
+  return `${baseUrl}/api/og?${urlParams.toString()}`;
+}
+
 export default async function handler(req, res) {
   const { untrustedData } = req.body;
   const buttonIndex = untrustedData?.buttonIndex;
@@ -17,10 +22,14 @@ export default async function handler(req, res) {
         ? `Correct! The answer was ${state.correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
         : `Wrong. The correct answer was ${state.correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
-      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
-      const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
+      const shareText = `I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`;
+      const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
-      const ogImageUrl = `${baseUrl}/api/og?message=${encodeURIComponent(truncateDescription(message))}`;
+      const ogImageUrl = generateOgImageUrl(baseUrl, {
+        title: 'Space Guessing Game',
+        description: truncateDescription(message),
+        image: '/spaceGame.png'
+      });
 
       const html = `
         <html>
@@ -49,11 +58,11 @@ export default async function handler(req, res) {
       const button1Content = correctButtonIndex === 1 ? title : wrongSpaceName;
       const button2Content = correctButtonIndex === 2 ? title : wrongSpaceName;
 
-      const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
+      const ogImageUrl = generateOgImageUrl(baseUrl, {
         title,
         description: truncateDescription(description),
         image
-      }).toString();
+      });
 
       const html = `
         <html>
@@ -79,7 +88,7 @@ export default async function handler(req, res) {
       <html>
         <head>
           <meta property="fc:frame" content="vNext" />
-          <meta property="fc:frame:image" content="${process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app'}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
+          <meta property="fc:frame:image" content="${generateOgImageUrl(process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app', { message: 'An error occurred. Please try again.' })}" />
           <meta property="fc:frame:button:1" content="Try Again" />
           <meta property="fc:frame:post_url" content="${process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app'}/api/answer" />
         </head>

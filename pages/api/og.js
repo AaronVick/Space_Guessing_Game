@@ -5,26 +5,10 @@ export const config = {
 };
 
 export default async function handler(req) {
-  let title, description, image;
-
-  if (req.method === 'POST') {
-    try {
-      const body = await req.json();
-      ({ title, description, image } = body);
-    } catch (error) {
-      console.error('Error parsing JSON:', error);
-      return new Response('Bad Request', { status: 400 });
-    }
-  } else {
-    const { searchParams } = new URL(req.url);
-    title = searchParams.get('title');
-    description = searchParams.get('description');
-    image = searchParams.get('image');
-  }
-
-  title = title || 'Space Guessing Game';
-  description = description || 'Guess the space object based on the image';
-  image = image || '/spaceGame.png';
+  const url = new URL(req.url);
+  const title = decodeURIComponent(url.searchParams.get('title') || '');
+  const description = decodeURIComponent(url.searchParams.get('description') || '');
+  const image = decodeURIComponent(url.searchParams.get('image') || '');
 
   return new ImageResponse(
     (
