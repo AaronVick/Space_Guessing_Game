@@ -1,42 +1,89 @@
+import { ImageResponse } from '@vercel/og';
+
 export const config = {
   runtime: 'edge',
 };
 
 export default async function handler(req) {
-  console.log('Received request URL:', req.url);
+  console.log('OG handler started');
+  const { searchParams } = new URL(req.url);
+  
+  // For answer frame
+  const message = searchParams.get('message');
+  
+  // For question frame
+  const title = searchParams.get('title');
+  const description = searchParams.get('description');
+  const image = searchParams.get('image');
 
-  let searchParams;
-  try {
-    const url = req.url.startsWith('http') ? new URL(req.url) : new URL(req.url, 'http://dummy.com');
-    searchParams = url.searchParams;
-    console.log('Parsed URL:', url.toString());
-  } catch (error) {
-    console.error('Error parsing URL:', error);
-    return new Response('Invalid URL', { status: 400 });
+  console.log('Received params:', { message, title, description, image });
+
+  let content;
+  if (message) {
+    // Answer frame
+    content = (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'black',
+          color: 'white',
+          padding: '40px',
+          textAlign: 'center',
+        }}
+      >
+        <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Space Guessing Game</h1>
+        <p style={{ fontSize: '24px' }}>{message}</p>
+      </div>
+    );
+  } else if (title && description && image) {
+    // Question frame
+    content = (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'black',
+          color: 'white',
+          padding: '40px',
+          textAlign: 'center',
+        }}
+      >
+        <img src={image} alt={title} style={{ maxWidth: '80%', maxHeight: '60%', objectFit: 'contain', marginBottom: '20px' }} />
+        <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>{title}</h1>
+        <p style={{ fontSize: '18px' }}>{description}</p>
+      </div>
+    );
+  } else {
+    // Default frame
+    content = (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'black',
+          color: 'white',
+        }}
+      >
+        <h1 style={{ fontSize: '48px' }}>Space Guessing Game</h1>
+      </div>
+    );
   }
 
-  const title = searchParams.get('title') || 'Space Guessing Game';
-  const description = searchParams.get('description') || 'Guess the space object based on the image';
-  const image = searchParams.get('image') || '/spaceGame.png';
-
-  console.log('Parsed parameters:', { title, description, image });
-
-  const html = `
-    <html>
-      <head>
-        <meta property="og:title" content="${title}" />
-        <meta property="og:description" content="${description}" />
-        <meta property="og:image" content="${image}" />
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <p>${description}</p>
-        <img src="${image}" alt="${title}" style="max-width: 100%;" />
-      </body>
-    </html>
-  `;
-
-  return new Response(html, {
-    headers: { 'Content-Type': 'text/html' },
+  console.log('Generating image response');
+  return new ImageResponse(content, {
+    width: 1200,
+    height: 630,
   });
 }
