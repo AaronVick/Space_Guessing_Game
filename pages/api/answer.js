@@ -28,8 +28,8 @@ export default async function handler(req, res) {
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
       const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
-        message: message,
-        type: 'answer'
+        type: 'answer',
+        message: message
       }).toString();
 
       html = `
@@ -56,10 +56,10 @@ export default async function handler(req, res) {
       const newCorrectIndex = answers.indexOf(title) + 1;
 
       const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
+        type: 'question',
         title: title,
         description: description,
-        image: image,
-        type: 'question'
+        image: image
       }).toString();
 
       html = `
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}&type=error" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?type=error&message=${encodeURIComponent('An error occurred. Please try again.')}" />
     <meta property="fc:frame:button:1" content="Try Again" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
   </head>
