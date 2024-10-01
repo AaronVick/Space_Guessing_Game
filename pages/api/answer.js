@@ -2,10 +2,22 @@ import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
 export default async function handler(req, res) {
   console.log('Answer handler started');
+  console.log('Request method:', req.method);
+  
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app';
-  const { untrustedData } = req.body;
-  const buttonIndex = untrustedData?.buttonIndex;
-  const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
+  
+  let buttonIndex, state;
+  if (req.method === 'POST') {
+    const { untrustedData } = req.body;
+    buttonIndex = untrustedData?.buttonIndex;
+    state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
+  } else if (req.method === 'GET') {
+    buttonIndex = parseInt(req.query.buttonIndex);
+    state = JSON.parse(decodeURIComponent(req.query.state || '{}'));
+  } else {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
   const { correctTitle, correctIndex, totalAnswered = 0, correctCount = 0, stage } = state;
 
   console.log('Received state:', state);
