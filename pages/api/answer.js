@@ -1,10 +1,5 @@
 import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
-function truncateDescription(description, maxLength = 100) {
-  if (description.length <= maxLength) return description;
-  return description.substring(0, maxLength - 3) + '...';
-}
-
 export default async function handler(req, res) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app';
   const { untrustedData } = req.body;
@@ -18,9 +13,6 @@ export default async function handler(req, res) {
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
-      const message = isCorrect 
-        ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
-        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
@@ -30,7 +22,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(truncateDescription(message, 200))}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?result=${isCorrect ? 'correct' : 'wrong'}&answer=${encodeURIComponent(correctTitle)}&score=${newCorrectCount}&total=${newTotalAnswered}" />
     <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
@@ -51,7 +43,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?image=${encodeURIComponent(image)}&description=${encodeURIComponent(truncateDescription(description, 200))}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?image=${encodeURIComponent(image)}" />
     <meta property="fc:frame:button:1" content="${answers[0]}" />
     <meta property="fc:frame:button:2" content="${answers[1]}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
@@ -71,7 +63,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?error=true" />
     <meta property="fc:frame:button:1" content="Try Again" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
   </head>

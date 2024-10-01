@@ -6,26 +6,16 @@ export const config = {
 
 export default function handler(req) {
   try {
-    console.log('OG handler started');
-    console.log('Request URL:', req.url);
-
-    let url;
-    try {
-      url = new URL(req.url, 'http://localhost');
-    } catch (error) {
-      console.error('Error parsing URL:', error);
-      throw new Error('Invalid URL');
-    }
-
-    const searchParams = url.searchParams;
+    const { searchParams } = new URL(req.url);
     
-    const message = searchParams.get('message');
+    const result = searchParams.get('result');
+    const answer = searchParams.get('answer');
+    const score = searchParams.get('score');
+    const total = searchParams.get('total');
     const image = searchParams.get('image');
-    const description = searchParams.get('description');
+    const error = searchParams.get('error');
 
-    console.log('Parsed params:', { message, image, description });
-
-    if (message) {
+    if (result && answer && score && total) {
       // Answer frame
       return new ImageResponse(
         (
@@ -40,9 +30,13 @@ export default function handler(req) {
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            {message}
+            <h1 style={{ marginBottom: '20px' }}>{result === 'correct' ? 'Correct!' : 'Wrong!'}</h1>
+            <p style={{ marginBottom: '20px' }}>The answer was: {answer}</p>
+            <p>Score: {score} / {total}</p>
           </div>
         ),
         {
@@ -50,7 +44,7 @@ export default function handler(req) {
           height: 630,
         },
       );
-    } else if (image && description) {
+    } else if (image) {
       // Question frame
       return new ImageResponse(
         (
@@ -69,8 +63,33 @@ export default function handler(req) {
               flexDirection: 'column',
             }}
           >
-            <img src={image} alt="Space Object" style={{ maxWidth: '80%', maxHeight: '60%', objectFit: 'contain' }} />
-            <p style={{ marginTop: '20px' }}>{description}</p>
+            <img src={image} alt="Space Object" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+            <p style={{ marginTop: '20px' }}>What is this space object?</p>
+          </div>
+        ),
+        {
+          width: 1200,
+          height: 630,
+        },
+      );
+    } else if (error) {
+      // Error frame
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              fontSize: 40,
+              color: 'white',
+              background: 'black',
+              width: '100%',
+              height: '100%',
+              padding: '50px 50px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            An error occurred. Please try again.
           </div>
         ),
         {
