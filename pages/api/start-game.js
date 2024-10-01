@@ -22,9 +22,9 @@ export default async function handler(req, res) {
 
     const truncatedDescription = truncateDescription(description);
     const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
-      title,
-      description: truncatedDescription,
-      image
+      title: encodeURIComponent(title),
+      description: encodeURIComponent(truncatedDescription),
+      image: encodeURIComponent(image)
     }).toString();
 
     const html = `
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
   }
 }
 
-function truncateDescription(description, maxLength = 200) {
+function truncateDescription(description, maxLength = 100) {
   if (description.length <= maxLength) return description;
   return description.substr(0, maxLength - 3) + '...';
 }
