@@ -6,45 +6,38 @@ export const config = {
 
 export default function handler(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const title = searchParams.get('title') || 'Space Guessing Game';
-    const description = searchParams.get('description') || 'Guess the space object based on the image';
-    const imageUrl = searchParams.get('image');
-
-    let image = '/spaceGame.png';  // Default fallback image
-    if (imageUrl) {
-      try {
-        new URL(imageUrl);  // Validate the URL
-        image = imageUrl;
-      } catch (error) {
-        console.error('Invalid image URL:', imageUrl);
-        // Keep using the fallback image
-      }
-    }
+    const url = new URL(req.url);
+    const title = url.searchParams.get('title') || 'Space Guessing Game';
+    const description = truncateDescription(url.searchParams.get('description') || 'Guess the space object based on the image');
+    const imageUrl = url.searchParams.get('image') || '/spaceGame.png';
 
     return new ImageResponse(
       (
         <div
           style={{
-            display: 'flex',
             width: '100%',
             height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             backgroundColor: 'black',
             color: 'white',
-            padding: '20px',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
+            padding: '40px 20px',
           }}
         >
-          {/* Use next/image for better image handling */}
           <img
-            src={image}
-            alt="Space Object Image"
-            style={{ maxWidth: '100%', maxHeight: '70%', objectFit: 'contain' }}
+            src={imageUrl}
+            alt="Space Object"
+            style={{
+              maxWidth: '80%',
+              maxHeight: '50%',
+              objectFit: 'contain',
+              marginBottom: '20px',
+            }}
           />
-          <h1 style={{ fontSize: '24px', textAlign: 'center', margin: '10px 0' }}>{title}</h1>
-          <p style={{ fontSize: '16px', textAlign: 'center', margin: '0' }}>{description}</p>
+          <h1 style={{ fontSize: '32px', textAlign: 'center', margin: '0 0 10px' }}>{title}</h1>
+          <p style={{ fontSize: '18px', textAlign: 'center', margin: '0', maxWidth: '80%' }}>{description}</p>
         </div>
       ),
       {
@@ -54,6 +47,11 @@ export default function handler(req) {
     );
   } catch (error) {
     console.error('Error in OG image generation:', error);
-    return new Response('Error generating image', { status: 500 });
+    return new Response(`Error generating image: ${error.message}`, { status: 500 });
   }
+}
+
+function truncateDescription(description, maxLength = 200) {
+  if (description.length <= maxLength) return description;
+  return description.substr(0, maxLength - 3) + '...';
 }

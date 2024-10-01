@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
-      const ogImageUrl = `${baseUrl}/api/og?message=${encodeURIComponent(message)}`;
+      const ogImageUrl = `${baseUrl}/api/og?message=${encodeURIComponent(truncateDescription(message))}`;
 
       const html = `
         <html>
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
 
       const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
         title,
-        description,
+        description: truncateDescription(description),
         image
       }).toString();
 
@@ -90,4 +90,9 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'text/html');
     res.status(500).send(errorHtml);
   }
+}
+
+function truncateDescription(description, maxLength = 200) {
+  if (description.length <= maxLength) return description;
+  return description.substr(0, maxLength - 3) + '...';
 }

@@ -20,9 +20,10 @@ export default async function handler(req, res) {
     const button1Content = correctButtonIndex === 1 ? title : wrongSpaceName;
     const button2Content = correctButtonIndex === 2 ? title : wrongSpaceName;
 
+    const truncatedDescription = truncateDescription(description);
     const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
       title,
-      description,
+      description: truncatedDescription,
       image
     }).toString();
 
@@ -46,4 +47,9 @@ export default async function handler(req, res) {
     console.error('Error in start-game handler:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+}
+
+function truncateDescription(description, maxLength = 200) {
+  if (description.length <= maxLength) return description;
+  return description.substr(0, maxLength - 3) + '...';
 }
