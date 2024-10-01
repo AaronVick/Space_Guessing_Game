@@ -1,10 +1,15 @@
-import { ImageResponse } from '@vercel/og';  // Make sure this package is installed
+import { ImageResponse } from '@vercel/og';
 
 export const config = {
   runtime: 'edge',
 };
 
 export default async function handler(req) {
+  if (req.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  // Parse the body of the POST request correctly
   const { untrustedData } = await req.json();
   const buttonIndex = untrustedData?.buttonIndex;
   const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
@@ -18,7 +23,7 @@ export default async function handler(req) {
     const result = isCorrect ? 'Correct!' : 'Wrong!';
     const message = `${result} The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
-    // Return the dynamically generated image as an HTML-styled response
+    // Return dynamically generated image using Vercel OG API
     return new ImageResponse(
       (
         <div
