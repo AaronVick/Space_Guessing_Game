@@ -27,12 +27,17 @@ export default async function handler(req, res) {
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
+      const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
+        message: message,
+        type: 'answer'
+      }).toString();
+
       html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(message)}" />
+    <meta property="fc:frame:image" content="${ogImageUrl}" />
     <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
@@ -50,12 +55,19 @@ export default async function handler(req, res) {
       const answers = [title, wrongSpaceName].sort(() => Math.random() - 0.5);
       const newCorrectIndex = answers.indexOf(title) + 1;
 
+      const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
+        title: title,
+        description: description,
+        image: image,
+        type: 'question'
+      }).toString();
+
       html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(image)}" />
+    <meta property="fc:frame:image" content="${ogImageUrl}" />
     <meta property="fc:frame:button:1" content="${answers[0]}" />
     <meta property="fc:frame:button:2" content="${answers[1]}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
@@ -76,7 +88,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}&type=error" />
     <meta property="fc:frame:button:1" content="Try Again" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
   </head>

@@ -8,18 +8,16 @@ export default async function handler(req) {
   console.log('OG handler started');
   const { searchParams } = new URL(req.url);
   
-  // For answer frame
+  const type = searchParams.get('type');
   const message = searchParams.get('message');
-  
-  // For question frame
   const title = searchParams.get('title');
   const description = searchParams.get('description');
   const image = searchParams.get('image');
 
-  console.log('Received params:', { message, title, description, image });
+  console.log('Received params:', { type, message, title, description, image });
 
   let content;
-  if (message) {
+  if (type === 'answer' && message) {
     // Answer frame
     content = (
       <div
@@ -40,7 +38,7 @@ export default async function handler(req) {
         <p style={{ fontSize: '24px' }}>{message}</p>
       </div>
     );
-  } else if (title && description && image) {
+  } else if (type === 'question' && title && description && image) {
     // Question frame
     content = (
       <div
