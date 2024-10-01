@@ -4,12 +4,13 @@ export const config = {
   runtime: 'edge',
 };
 
-export default function handler(req) {
+export default async function handler(req) {
+  if (req.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
   try {
-    const { searchParams } = new URL(req.url);
-    const title = searchParams.get('title') || 'Space Guessing Game';
-    const description = searchParams.get('description') || 'Guess the space object based on the image';
-    const imageUrl = searchParams.get('image') || 'https://space-guessing-game.vercel.app/spaceGame.png';
+    const { title, description, image } = await req.json();
 
     return new ImageResponse(
       (
@@ -28,7 +29,7 @@ export default function handler(req) {
         >
           <h1 style={{ fontSize: '32px', textAlign: 'center', marginBottom: '10px' }}>{title}</h1>
           <p style={{ fontSize: '18px', textAlign: 'center', marginBottom: '20px' }}>{description}</p>
-          <img src={imageUrl} alt="Space Object" style={{ maxWidth: '80%', maxHeight: '50%', objectFit: 'contain' }} />
+          <img src={image} alt="Space Object" style={{ maxWidth: '80%', maxHeight: '50%', objectFit: 'contain' }} />
         </div>
       ),
       {

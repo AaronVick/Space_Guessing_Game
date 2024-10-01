@@ -1,5 +1,25 @@
 import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
+async function generateOgImage(baseUrl, title, description, image) {
+  const response = await fetch(`${baseUrl}/api/og`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title,
+      description: truncateDescription(description),
+      image,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to generate OG image: ${response.statusText}`);
+  }
+
+  return response.url;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -20,12 +40,8 @@ export default async function handler(req, res) {
     const button1Content = correctButtonIndex === 1 ? title : wrongSpaceName;
     const button2Content = correctButtonIndex === 2 ? title : wrongSpaceName;
 
-    const truncatedDescription = truncateDescription(description);
-    const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
-      title: encodeURIComponent(title),
-      description: encodeURIComponent(truncatedDescription),
-      image: encodeURIComponent(image)
-    }).toString();
+    // Generate OG image
+    const ogImageUrl = await generateOgImage(baseUrl, title, description, image);
 
     const html = `
       <html>
