@@ -9,8 +9,8 @@ export default async function handler(req) {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  // Parse the body of the POST request correctly
-  const { untrustedData } = await req.json();
+  // Parse the body correctly
+  const { untrustedData } = req.body;  // req.body is automatically parsed by Next.js API
   const buttonIndex = untrustedData?.buttonIndex;
   const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
 
@@ -23,7 +23,7 @@ export default async function handler(req) {
     const result = isCorrect ? 'Correct!' : 'Wrong!';
     const message = `${result} The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
-    // Return dynamically generated image using Vercel OG API
+    // Return the dynamically generated image using Vercel OG
     return new ImageResponse(
       (
         <div
