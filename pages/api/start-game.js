@@ -1,13 +1,13 @@
 import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
-function generateOgImageUrl(baseUrl, title, description, image) {
+function generateOgUrl(baseUrl, title, description, image) {
   const params = new URLSearchParams({
     title: title,
     description: truncateDescription(description),
     image: image,
   });
   const url = `${baseUrl}/api/og?${params.toString()}`;
-  console.log('Generated OG Image URL:', url);
+  console.log('Generated OG URL:', url);
   return url;
 }
 
@@ -34,20 +34,27 @@ export default async function handler(req, res) {
     const button1Content = correctButtonIndex === 1 ? title : wrongSpaceName;
     const button2Content = correctButtonIndex === 2 ? title : wrongSpaceName;
 
-    // Generate OG image URL
-    const ogImageUrl = generateOgImageUrl(baseUrl, title, description, image);
+    // Generate OG URL
+    const ogUrl = generateOgUrl(baseUrl, title, description, image);
 
     const html = `
       <html>
         <head>
           <meta property="fc:frame" content="vNext" />
-          <meta property="fc:frame:image" content="${ogImageUrl}" />
+          <meta property="fc:frame:image" content="${image}" />
           <meta property="fc:frame:button:1" content="${button1Content}" />
           <meta property="fc:frame:button:2" content="${button2Content}" />
           <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
           <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: title, correctIndex: correctButtonIndex, totalAnswered: 0, correctCount: 0, stage: 'question' }))}" />
+          <meta property="og:title" content="${title}" />
+          <meta property="og:description" content="${truncateDescription(description)}" />
+          <meta property="og:image" content="${image}" />
         </head>
-        <body></body>
+        <body>
+          <h1>${title}</h1>
+          <p>${truncateDescription(description)}</p>
+          <img src="${image}" alt="${title}" style="max-width: 100%;" />
+        </body>
       </html>
     `;
 

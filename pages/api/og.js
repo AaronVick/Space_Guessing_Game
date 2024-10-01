@@ -1,5 +1,3 @@
-import { ImageResponse } from '@vercel/og';
-
 export const config = {
   runtime: 'edge',
 };
@@ -9,7 +7,6 @@ export default async function handler(req) {
 
   let searchParams;
   try {
-    // Handle both absolute and relative URLs
     const url = req.url.startsWith('http') ? new URL(req.url) : new URL(req.url, 'http://dummy.com');
     searchParams = url.searchParams;
     console.log('Parsed URL:', url.toString());
@@ -24,37 +21,22 @@ export default async function handler(req) {
 
   console.log('Parsed parameters:', { title, description, image });
 
-  try {
-    const imageResponse = new ImageResponse(
-      (
-        <div
-          style={{
-            display: 'flex',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '20px',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <img src={image} alt="Space Image" style={{ maxWidth: '100%', maxHeight: '70%' }} />
-          <h1 style={{ fontSize: '32px', textAlign: 'center', marginTop: '10px' }}>{title}</h1>
-          <p style={{ fontSize: '18px', textAlign: 'center' }}>{description}</p>
-        </div>
-      ),
-      {
-        width: 1200,
-        height: 630,
-      }
-    );
+  const html = `
+    <html>
+      <head>
+        <meta property="og:title" content="${title}" />
+        <meta property="og:description" content="${description}" />
+        <meta property="og:image" content="${image}" />
+      </head>
+      <body>
+        <h1>${title}</h1>
+        <p>${description}</p>
+        <img src="${image}" alt="${title}" style="max-width: 100%;" />
+      </body>
+    </html>
+  `;
 
-    console.log('Successfully generated image response');
-    return imageResponse;
-  } catch (error) {
-    console.error('Error generating image response:', error);
-    return new Response(`Error generating image: ${error.message}`, { status: 500 });
-  }
+  return new Response(html, {
+    headers: { 'Content-Type': 'text/html' },
+  });
 }
