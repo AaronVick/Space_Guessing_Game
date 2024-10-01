@@ -6,11 +6,12 @@ export const config = {
 
 export default function handler(req) {
   try {
-    const searchParams = req.nextUrl.searchParams;
-
-    const result = searchParams.get('result');  // Correct or Wrong
-    const correctAnswer = searchParams.get('correctAnswer');  // The correct answer
-    const score = searchParams.get('score');  // User's score: "X out of Y"
+    // Fix the issue by correctly creating the URL object
+    const url = new URL(req.url, `https://${req.headers.host}`);
+    
+    const result = url.searchParams.get('result');  // Correct or Wrong
+    const correctAnswer = url.searchParams.get('correctAnswer');  // The correct answer
+    const score = url.searchParams.get('score');  // User's score: "X out of Y"
 
     // Basic validation of inputs
     if (result && correctAnswer && score) {
