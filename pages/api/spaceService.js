@@ -1,32 +1,61 @@
 import axios from 'axios';
 
+const NASA_API_KEY = process.env.NASA_API; 
 const NASA_API_URL = 'https://images-api.nasa.gov/search';
 
-export async function fetchSpaceData(searchTerm = 'galaxy') {
+export async function fetchSpaceData(query) {
   try {
     const response = await axios.get(NASA_API_URL, {
       params: {
-        q: searchTerm,
+        q: query,
         media_type: 'image',
-        api_key: process.env.NASA_API // Ensure this is set correctly
+        api_key: NASA_API_KEY
       }
     });
 
-    if (response.data.collection && response.data.collection.items.length > 0) {
-      const data = response.data.collection.items[0].data[0];
-      const imageUrl = response.data.collection.items[0].links[0].href;
+    const items = response.data.collection.items;
 
-      return {
-        title: data.title || 'Unknown Space Object',
-        description: data.description || 'No description available.',
-        image: imageUrl || '/default-image.png' // Fallback to a default image
-      };
-    } else {
-      console.error('No space data found.');
-      throw new Error('No space data found.');
+    // Filter to make sure we only get images, excluding videos
+    const imageItems = items.filter(item => {
+      const { data } = item;
+      const hasImage = item.links && item.links[0].href.match(/\.(jpg|jpeg|png)$/);
+      const isImageType = data[0].media_type === 'image';
+      return isImageType && hasImage;
+    });
+
+    if (imageItems.length === 0) {
+      throw new Error('No valid images found');
     }
+
+    const randomIndex = Math.floor(Math.random() * imageItems.length);
+    const selectedItem = imageItems[randomIndex];
+
+    const title = selectedItem.data[0].title;
+    const description = selectedItem.data[0].description || 'No description available';
+    const image = selectedItem.links[0].href;
+
+    return { title, description, image };
   } catch (error) {
-    console.error('Error fetching data from NASA API:', error);
-    throw error;
+    console.error('Error fetching data from NASA API:', error.message);
+    throw new Error('Failed to fetch space data');
   }
+}
+
+export async function fetchRandomSpaceNames(numNames, excludeName) {
+  const fallbackSpaceNames = [
+    'Andromeda Galaxy', 'Milky Way', 'Crab Nebula', 'Orion Nebula', 'Ring Nebula',
+    'Sombrero Galaxy', 'Triangulum Galaxy', 'Whirlpool Galaxy', 'Large Magellanic Cloud',
+    'Small Magellanic Cloud', 'Omega Nebula', 'Eagle Nebula', 'Helix Nebula'
+  ];
+
+  let spaceNames = fallbackSpaceNames.filter(name => name !== excludeName);
+  let randomNames = [];
+
+  for (let i = 0; i < numNames; i++) {
+    const randomIndex = Math.floor(Math.random() * spaceNames.length);
+    randomNames.push(spaceNames[randomIndex]);
+    spaceNames = spaceNames.filter((_, index) => index !== randomIndex);
+  }
+
+  return randomNames;
 }
