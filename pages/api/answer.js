@@ -11,16 +11,16 @@ export default async function handler(req, res) {
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
-      const result = isCorrect ? 'Correct!' : 'Wrong!';
-      const message = `${result} The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
+      const result = isCorrect ? 'Correct' : 'Wrong';
+      const score = `${newCorrectCount} / ${newTotalAnswered}`;
 
-      // HTML response for correct/wrong answers
+      // Use /api/answerOG for the answer frame generation
       html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(message)}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/answerOG?result=${encodeURIComponent(result)}&correctAnswer=${encodeURIComponent(correctTitle)}&score=${encodeURIComponent(score)}" />
     <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/start-game" />
     <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount, stage: 'answer' }))}" />
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
-      // Fallback in case of an issue
+      // Handle invalid state
       html = `
 <!DOCTYPE html>
 <html>
