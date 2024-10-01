@@ -14,7 +14,7 @@ export default function handler(req) {
     const image = searchParams.get('image');
 
     if (result && correctAnswer && score) {
-      // Answer frame
+      // Answer frame (correct/wrong response)
       return new ImageResponse(
         (
           <div
@@ -43,7 +43,7 @@ export default function handler(req) {
         },
       );
     } else if (image) {
-      // Question frame
+      // Question frame (with image)
       return new ImageResponse(
         (
           <div
