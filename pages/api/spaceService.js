@@ -7,9 +7,8 @@ export async function fetchSpaceData(query) {
   try {
     const response = await axios.get(NASA_API_URL, {
       params: {
-        q: query,
+        q: query || 'galaxy', // Ensuring 'galaxy' is always passed as a fallback query
         media_type: 'image',
-        api_key: NASA_API_KEY
       }
     });
 
