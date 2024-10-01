@@ -5,28 +5,16 @@ export const config = {
 };
 
 export default function handler(req) {
-  console.log('OG handler started');
-  console.log('Request URL:', req.url);
-
   try {
-    const url = new URL(req.url, 'http://localhost');
-    console.log('Parsed URL:', url.toString());
-    
-    const searchParams = url.searchParams;
-    console.log('Search params:', Object.fromEntries(searchParams));
+    const { searchParams } = new URL(req.url);
     
     const result = searchParams.get('result');
-    const answer = searchParams.get('answer');
+    const correctAnswer = searchParams.get('correctAnswer');
     const score = searchParams.get('score');
-    const total = searchParams.get('total');
     const image = searchParams.get('image');
-    const error = searchParams.get('error');
 
-    console.log('Extracted params:', { result, answer, score, total, image, error });
-
-    if (result && answer && score && total) {
+    if (result && correctAnswer && score) {
       // Answer frame
-      console.log('Generating answer frame');
       return new ImageResponse(
         (
           <div
@@ -44,9 +32,9 @@ export default function handler(req) {
               flexDirection: 'column',
             }}
           >
-            <h1 style={{ marginBottom: '20px' }}>{result === 'correct' ? 'Correct!' : 'Wrong!'}</h1>
-            <p style={{ marginBottom: '20px' }}>The answer was: {answer}</p>
-            <p>Score: {score} / {total}</p>
+            <h1 style={{ fontSize: 60, marginBottom: '20px' }}>{result}!</h1>
+            <p style={{ marginBottom: '20px' }}>The correct answer was: {correctAnswer}</p>
+            <p>Score: {score}</p>
           </div>
         ),
         {
@@ -56,7 +44,6 @@ export default function handler(req) {
       );
     } else if (image) {
       // Question frame
-      console.log('Generating question frame');
       return new ImageResponse(
         (
           <div
@@ -85,7 +72,6 @@ export default function handler(req) {
       );
     } else {
       // Default frame
-      console.log('Generating default frame');
       return new ImageResponse(
         (
           <div
@@ -112,7 +98,6 @@ export default function handler(req) {
     }
   } catch (e) {
     console.error(`Error in OG handler: ${e.message}`);
-    console.error(e.stack);
     return new Response(`Failed to generate the image: ${e.message}`, {
       status: 500,
     });

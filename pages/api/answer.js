@@ -26,13 +26,20 @@ export default async function handler(req, res) {
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
+      // Generate dynamic OG image URL
+      const ogImageUrl = `${baseUrl}/api/og?` + new URLSearchParams({
+        result: result,
+        correctAnswer: correctTitle,
+        score: `${newCorrectCount}/${newTotalAnswered}`
+      }).toString();
+
       // Build HTML response with necessary metatags for Farcaster frame
       const html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/answer-background.png" />
+    <meta property="fc:frame:image" content="${ogImageUrl}" />
     <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
