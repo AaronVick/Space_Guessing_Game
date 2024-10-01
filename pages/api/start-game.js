@@ -6,7 +6,9 @@ function generateOgImageUrl(baseUrl, title, description, image) {
     description: truncateDescription(description),
     image: image,
   });
-  return `${baseUrl}/api/og?${params.toString()}`;
+  const url = `${baseUrl}/api/og?${params.toString()}`;
+  console.log('Generated OG Image URL:', url);
+  return url;
 }
 
 export default async function handler(req, res) {
@@ -15,14 +17,17 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('Starting game handler');
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://space-guessing-game.vercel.app';
 
     // Fetch space data from NASA API
     const spaceData = await fetchSpaceData('galaxy');
+    console.log('Fetched space data:', spaceData);
     const { title, description, image } = spaceData;
 
     // Fetch a random wrong space object name
     const [wrongSpaceName] = await fetchRandomSpaceNames(1, title);
+    console.log('Wrong space name:', wrongSpaceName);
 
     // Randomly assign correct answer to button 1 or 2
     const correctButtonIndex = Math.random() < 0.5 ? 1 : 2;
@@ -46,6 +51,7 @@ export default async function handler(req, res) {
       </html>
     `;
 
+    console.log('Sending HTML response');
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (error) {
