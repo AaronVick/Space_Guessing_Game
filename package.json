@@ -1,14 +1,22 @@
 {
   "name": "space-guessing-game",
   "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
+    "axios": "^0.21.1",
+    "next": "12.2.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "@vercel/og": "^0.1.0"
+  },
+  "devDependencies": {
+    "eslint": "8.11.0",
+    "eslint-config-next": "12.2.0"
   }
 }
