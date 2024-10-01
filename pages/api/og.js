@@ -4,45 +4,97 @@ export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req) {
-  console.log('OG handler started');
-  
-  const { searchParams } = new URL(req.url, 'http://localhost');
-  const type = searchParams.get('type');
-
-  console.log('Received type:', type);
-
-  let content;
-  if (type === 'answer') {
-    const result = searchParams.get('result');
-    const correct = searchParams.get('correct');
-    const total = searchParams.get('total');
-    content = (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: 'black', color: 'white', padding: '40px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Space Guessing Game</h1>
-        <p style={{ fontSize: '36px', marginBottom: '20px' }}>{result}!</p>
-        <p style={{ fontSize: '24px' }}>You've guessed {correct} out of {total} correctly.</p>
-      </div>
-    );
-  } else if (type === 'question') {
+export default function handler(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    
+    const message = searchParams.get('message');
     const image = searchParams.get('image');
-    content = (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: 'black', color: 'white', padding: '40px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '36px', marginBottom: '20px' }}>What is this space object?</h1>
-        {image && <img src={image} alt="Space Object" style={{ maxWidth: '80%', maxHeight: '60%', objectFit: 'contain' }} />}
-      </div>
-    );
-  } else {
-    content = (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: 'black', color: 'white' }}>
-        <h1 style={{ fontSize: '48px' }}>Space Guessing Game</h1>
-      </div>
-    );
-  }
+    const description = searchParams.get('description');
 
-  console.log('Generating image response');
-  return new ImageResponse(content, {
-    width: 1200,
-    height: 630,
-  });
+    if (message) {
+      // Answer frame
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              fontSize: 60,
+              color: 'white',
+              background: 'black',
+              width: '100%',
+              height: '100%',
+              padding: '50px 200px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {message}
+          </div>
+        ),
+        {
+          width: 1200,
+          height: 630,
+        },
+      );
+    } else if (image && description) {
+      // Question frame
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              fontSize: 32,
+              color: 'white',
+              background: 'black',
+              width: '100%',
+              height: '100%',
+              padding: '50px 200px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <img src={image} alt="Space Object" style={{ maxWidth: '80%', maxHeight: '60%', objectFit: 'contain' }} />
+            <p style={{ marginTop: '20px' }}>{description}</p>
+          </div>
+        ),
+        {
+          width: 1200,
+          height: 630,
+        },
+      );
+    } else {
+      // Default frame
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              fontSize: 60,
+              color: 'white',
+              background: 'black',
+              width: '100%',
+              height: '100%',
+              padding: '50px 200px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            Space Guessing Game
+          </div>
+        ),
+        {
+          width: 1200,
+          height: 630,
+        },
+      );
+    }
+  } catch (e) {
+    console.log(`${e.message}`);
+    return new Response(`Failed to generate the image`, {
+      status: 500,
+    });
+  }
 }
