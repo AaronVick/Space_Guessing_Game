@@ -26,14 +26,14 @@ export default async function handler(req, res) {
 
       console.log('Answer check:', { buttonIndex, correctIndex, isCorrect, result, score });
 
-      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nFrame by @aaronv.eth`);
+      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
-      const answerOgUrl = `${baseUrl}/api/answerOG?result=${encodeURIComponent(result)}&correctAnswer=${encodeURIComponent(correctTitle)}&score=${encodeURIComponent(score)}`;
+      const answerOgUrl = `${baseUrl}/api/answerOG?result=${encodeURIComponent(result)}&correctAnswer=${encodeURIComponent(correctTitle)}&score=${encodeURIComponent(score)}&t=${Date.now()}`;
       console.log('Answer OG URL:', answerOgUrl);
 
       // Fallback image URL in case answerOG fails
-      const fallbackImageUrl = `${baseUrl}/api/og?message=${encodeURIComponent(`${result}! The correct answer was: ${correctTitle}. Score: ${score}`)}`;
+      const fallbackImageUrl = `${baseUrl}/api/og?message=${encodeURIComponent(`${result}! The correct answer was: ${correctTitle}. Score: ${score}`)}&t=${Date.now()}`;
 
       html = `
 <!DOCTYPE html>
@@ -52,7 +52,29 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
-      // ... (rest of the code for generating a new question remains the same)
+      console.log('Generating new question');
+      // This is the "Next Question" button or initial state, so we should show a new question
+      const { title, description, image } = await fetchSpaceData();
+      const [wrongAnswer] = await fetchRandomSpaceNames(1, title);
+      
+      const answers = [title, wrongAnswer].sort(() => Math.random() - 0.5);
+      const newCorrectIndex = answers.indexOf(title) + 1; // Add 1 to make it 1-based
+
+      console.log('New question:', { title, answers, newCorrectIndex });
+
+      html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta property="fc:frame" content="vNext" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?description=${encodeURIComponent(description)}&image=${encodeURIComponent(image || '')}&t=${Date.now()}" />
+    <meta property="fc:frame:button:1" content="${answers[0]}" />
+    <meta property="fc:frame:button:2" content="${answers[1]}" />
+    <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
+    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: title, correctIndex: newCorrectIndex, totalAnswered, correctCount, stage: 'question' }))}" />
+  </head>
+  <body></body>
+</html>`;
     }
 
     console.log('Sending game HTML response:', html);
@@ -66,7 +88,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}&t=${Date.now()}" />
     <meta property="fc:frame:button:1" content="Try Again" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
   </head>

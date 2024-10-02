@@ -5,43 +5,30 @@ export const config = {
 };
 
 export default async function handler(req) {
-  console.log('answerOG.js handler called');
   try {
-    const url = new URL(req.url, `https://${req.headers.host}`);
+    const { searchParams } = new URL(req.url);
+    const result = searchParams.get('result');
+    const correctAnswer = searchParams.get('correctAnswer');
+    const score = searchParams.get('score');
 
-    const result = url.searchParams.get('result');
-    const correctAnswer = url.searchParams.get('correctAnswer');
-    const score = url.searchParams.get('score');
-
-    console.log('Received parameters:', { result, correctAnswer, score });
-
-    if (!result || !correctAnswer || !score) {
-      console.log('Missing parameters');
-      return new Response('Missing parameters', { status: 400 });
-    }
-
-    console.log('Generating ImageResponse');
-    const imageResponse = new ImageResponse(
+    return new ImageResponse(
       (
         <div
           style={{
-            fontSize: 40,
-            color: 'white',
-            background: 'black',
-            width: '100%',
             height: '100%',
-            padding: '50px 50px',
-            textAlign: 'center',
-            justifyContent: 'center',
-            alignItems: 'center',
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            fontFamily: 'sans-serif',
           }}
         >
-          <h1 style={{ fontSize: 60, marginBottom: '20px' }}>{result}!</h1>
-          <p style={{ marginBottom: '20px', fontSize: 30 }}>The correct answer was:</p>
-          <p style={{ marginBottom: '20px', fontSize: 24 }}>{correctAnswer}</p>
-          <p style={{ fontSize: 36 }}>{`Score: ${score}`}</p>
+          <h1 style={{ fontSize: '60px', margin: '0' }}>{result}</h1>
+          <p style={{ fontSize: '30px', margin: '20px 0', textAlign: 'center', maxWidth: '80%' }}>Correct answer: {correctAnswer}</p>
+          <p style={{ fontSize: '40px', margin: '0' }}>Score: {score}</p>
         </div>
       ),
       {
@@ -49,11 +36,10 @@ export default async function handler(req) {
         height: 630,
       }
     );
-
-    console.log('ImageResponse generated successfully');
-    return imageResponse;
   } catch (e) {
-    console.error('Error in answerOG.js:', e);
-    return new Response(`Error: ${e.message}`, { status: 500 });
+    console.error(e);
+    return new Response(`Failed to generate image`, {
+      status: 500,
+    });
   }
 }
