@@ -1,6 +1,7 @@
 import { fetchSpaceData, fetchRandomSpaceNames } from './spaceService';
 
 export default async function handler(req, res) {
+  console.log('answer.js handler called');
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
@@ -16,6 +17,7 @@ export default async function handler(req, res) {
   try {
     let html;
     if (stage === 'question' && buttonIndex !== undefined) {
+      console.log('Generating answer frame');
       // This is the answer to a question
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === correctIndex;
@@ -23,17 +25,20 @@ export default async function handler(req, res) {
       const result = isCorrect ? 'Correct' : 'Wrong';
       const score = `${newCorrectCount} / ${newTotalAnswered}`;
 
-      console.log('Answer check:', { buttonIndex, correctIndex, isCorrect });
+      console.log('Answer check:', { buttonIndex, correctIndex, isCorrect, result, score });
 
-      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
+      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} space objects correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nFrame by @aaronv.eth`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
+
+      const answerOgUrl = `${baseUrl}/api/answerOG?result=${encodeURIComponent(result)}&correctAnswer=${encodeURIComponent(correctTitle)}&score=${encodeURIComponent(score)}`;
+      console.log('Answer OG URL:', answerOgUrl);
 
       html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/answerOG?result=${encodeURIComponent(result)}&correctAnswer=${encodeURIComponent(correctTitle)}&score=${encodeURIComponent(score)}" />
+    <meta property="fc:frame:image" content="${answerOgUrl}" />
     <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
@@ -44,6 +49,7 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
+      console.log('Generating new question');
       // This is the "Next Question" button or initial state, so we should show a new question
       const { title, description, image } = await fetchSpaceData();
       const [wrongAnswer] = await fetchRandomSpaceNames(1, title);

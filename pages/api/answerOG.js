@@ -5,15 +5,19 @@ export const config = {
 };
 
 export default function handler(req) {
+  console.log('answerOG.js handler called');
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
 
-    const result = url.searchParams.get('result');  // Correct or Wrong
-    const correctAnswer = url.searchParams.get('correctAnswer');  // The correct answer
-    const score = url.searchParams.get('score');  // User's score: "X out of Y"
+    const result = url.searchParams.get('result');
+    const correctAnswer = url.searchParams.get('correctAnswer');
+    const score = url.searchParams.get('score');
+
+    console.log('Received parameters:', { result, correctAnswer, score });
 
     // Basic validation of inputs
     if (result && correctAnswer && score) {
+      console.log('Generating ImageResponse');
       // Render the answer frame image - lightweight with no external image fetching
       return new ImageResponse(
         (
@@ -43,6 +47,7 @@ export default function handler(req) {
         }
       );
     } else {
+      console.log('Missing parameters');
       // Handle missing parameters
       return new Response('Missing parameters for result, correct answer, or score.', {
         status: 400,
