@@ -4,6 +4,7 @@
       { "src": "package.json", "use": "@vercel/next" }
     ],
     "routes": [
+      { "src": "/api/answerOG", "dest": "/api/answerOG" },
       { "src": "/api/frame", "dest": "/api/frame" },
       { "src": "/api/og", "dest": "/api/og" },
       { "src": "/api/answer", "dest": "/api/answer" },

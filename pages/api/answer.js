@@ -20,9 +20,8 @@ export default async function handler(req, res) {
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
-      const message = isCorrect 
-        ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
-        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
+      const result = isCorrect ? 'Correct' : 'Wrong';
+      const score = `${newCorrectCount} / ${newTotalAnswered}`;
 
       console.log('Answer check:', { buttonIndex, correctIndex, isCorrect });
 
@@ -34,7 +33,7 @@ export default async function handler(req, res) {
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(message)}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/answerOG?result=${encodeURIComponent(result)}&correctAnswer=${encodeURIComponent(correctTitle)}&score=${encodeURIComponent(score)}" />
     <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
